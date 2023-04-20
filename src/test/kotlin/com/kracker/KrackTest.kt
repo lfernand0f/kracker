@@ -4,18 +4,21 @@ import com.kracker.destination.KrackerCustom
 import com.kracker.destination.KrackerNoop
 import com.kracker.destination.KrackerPrivateStorage
 import com.kracker.destination.KrackerPublicStorage
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
 class KrackTest {
 
-    @Test
-    fun `krack code block specifying custom destination`() {
-        val krackResultCodeBlock = krack(Kracking.chooseDestination {
+    @Test fun `krack code block specifying custom destination`() {
+        Kracking.useCustomStorage {
             println("Some place")
-        }, onKrack = { k ->
+        }
+
+        val krackResultCodeBlock = krack<String, String, KrackerTrack<String, String>>(onKrack = { k ->
             k.track("HEY, YOU" to "I'M KRACK")
             k.dispatch()
             k
@@ -27,9 +30,8 @@ class KrackTest {
         )
     }
 
-    @Test
-    fun `krack code block without specify the destination, ie, noop`() {
-        val krackResultCodeBlock = krack { k ->
+    @Test fun `krack code block without specify the destination, ie, noop`() {
+        val krackResultCodeBlock = krack<String, String, KrackerTrack<String, String>> { k ->
             k.track("HEY, YOU" to "I'M KRACK")
             k
         }
@@ -40,12 +42,11 @@ class KrackTest {
         )
     }
 
-    @Test
-    fun `krack code block without specifying the public destination`() {
-        val krackResultCodeBlock = krack(
-            Kracking.useConsoleLog(),
-            Kracking.usePrivateStorage(File.createTempFile("krack", "_temp"))
-        ) { k ->
+    @Test fun `krack code block without specifying the public destination`(@TempDir tempDir: File) {
+        Kracking.useConsoleLog()
+        Kracking.usePrivateStorage(tempDir)
+
+        val krackResultCodeBlock = krack<String, String, KrackerTrack<String, String>> { k ->
             k.track("HEY, YOU" to "I'M KRACK")
             k
         }
@@ -56,12 +57,11 @@ class KrackTest {
         )
     }
 
-    @Test
-    fun `krack code block without specifying the private destination`() {
-        val krackResultCodeBlock = krack(
-            Kracking.useConsoleLog(),
-            Kracking.usePublicStorage(File.createTempFile("krack", "_temp"))
-        ) { k ->
+    @Test fun `krack code block without specifying the private destination`(@TempDir tempDir: File) {
+        Kracking.useConsoleLog()
+        Kracking.usePublicStorage(tempDir)
+
+        val krackResultCodeBlock = krack<String, String, KrackerTrack<String, String>> { k ->
             k.track("HEY, YOU" to "I'M KRACK")
             k
         }
@@ -72,12 +72,11 @@ class KrackTest {
         )
     }
 
-    @Test
-    fun `krack code block without specifying the console log destination`() {
-        val krackResultCodeBlock = krack(
-            Kracking.usePrivateStorage(File.createTempFile("krack", "_temp")),
-            Kracking.usePublicStorage(File.createTempFile("krack", "_temp"))
-        ) { k ->
+    @Test fun `krack code block without specifying the console log destination`(@TempDir tempDir: File) {
+        Kracking.usePrivateStorage(tempDir)
+        Kracking.usePublicStorage(tempDir)
+
+        val krackResultCodeBlock = krack<String, String, KrackerTrack<String, String>> { k ->
             k.track("HEY, YOU" to "I'M KRACK")
             k
         }
@@ -88,9 +87,9 @@ class KrackTest {
         )
     }
 
-    @Test
-    fun `krack code block with one or more track`() {
-        val krackResultCodeBlock = krack(Kracking.useConsoleLog()) { k ->
+    @Test fun `krack code block with one or more track`() {
+        Kracking.useConsoleLog()
+        val krackResultCodeBlock = krack<String, String, Unit> { k ->
             k.track("HEY, YOU" to "I'M KRACK")
             k.track("YOU" to "CAN TRACK OR")
             k.track("KRACK" to "YOUR CODE")
@@ -99,15 +98,18 @@ class KrackTest {
         assertEquals(Unit, krackResultCodeBlock)
     }
 
-    @Test
-    fun `krack code block without track`() {
-        val krackResultCodeBlock = krack<Unit, Nothing, Nothing>(Kracking.useConsoleLog()) { }
+    @Test fun `krack code block without track`() {
+        Kracking.useConsoleLog()
+        val krackResultCodeBlock = krack<Nothing, Nothing, Unit> { }
         assertEquals(Unit, krackResultCodeBlock)
     }
 
-    @Test
-    fun `krack code block without track and destination`() {
-        val krackResultCodeBlock = krack<Unit, Nothing, Nothing> { }
+    @Test fun `krack code block without track and destination`() {
+        val krackResultCodeBlock = krack<Nothing, Nothing, Unit> { }
         assertEquals(Unit, krackResultCodeBlock)
+    }
+
+    @AfterEach fun tearDown() {
+        Kracking.resetStorages()
     }
 }

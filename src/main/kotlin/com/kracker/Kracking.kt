@@ -18,21 +18,37 @@ object Kracking {
     private lateinit var _customDestination: () -> Unit
     public val customDestination: () -> Unit get() = _customDestination
 
-    fun useConsoleLog(): Destination = Destination.AT_CONSOLE_LOG
+    private var _destinations: MutableList<Destination> = mutableListOf()
+    public val destinations: List<Destination> get() = _destinations
+
+    fun useConsoleLog(): Destination {
+        _destinations += Destination.AT_CONSOLE_LOG
+        return Destination.AT_CONSOLE_LOG
+    }
 
     fun usePrivateStorage(parentDir: File): Destination {
         _privateParentDir = parentDir
+        _destinations += Destination.AT_PRIVATE_STORAGE
         return Destination.AT_PRIVATE_STORAGE
     }
 
     fun usePublicStorage(parentDir: File): Destination {
         _publicParentDir = parentDir
+        _destinations += Destination.AT_PUBLIC_STORAGE
         return Destination.AT_PUBLIC_STORAGE
     }
 
-    fun chooseDestination(onChoose: () -> Unit): Destination {
+    fun useCustomStorage(onChoose: () -> Unit): Destination {
         _customDestination = onChoose
+        _destinations += Destination.CUSTOM
         return Destination.CUSTOM
+    }
+
+    fun resetStorages() {
+        _destinations = mutableListOf(Destination.NONE)
+        _customDestination = {}
+        if (::_privateParentDir.isInitialized) _privateParentDir.deleteRecursively()
+        if (::_publicParentDir.isInitialized) _publicParentDir.deleteRecursively()
     }
 
     enum class Destination {
