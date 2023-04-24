@@ -1,14 +1,47 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.5.32'
+    id 'maven-publish'
+    id 'signing'
 }
 
-group = 'com.lfernf'
+group = 'com.kracker'
 version = '1.0-SNAPSHOT'
+archivesBaseName = "kracker"
 
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.9.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
+}
+
+tasks.register('sourcesJar', Jar) {
+    archiveClassifier.set('sources')
+    from(sourceSets.main.allSource)
+}
+
+tasks.register('javadocJar', Jar) {
+    archiveClassifier.set('javadoc')
+    from javadoc
+}
+
+signing {
+    sign configurations.archives
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components['java'])
+            groupId group
+            artifactId 'kracker'
+            version version
+            artifact(sourcesJar)
+        }
+    }
 }
 
 repositories {
