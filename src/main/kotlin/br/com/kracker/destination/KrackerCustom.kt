@@ -1,6 +1,6 @@
-package com.kracker.destination
+package br.com.kracker.destination
 
-import com.kracker.KrackerTrack
+import br.com.kracker.KrackerTrack
 
 class KrackerCustom<A, B>(private val onDestination: () -> Unit) : KrackerTrack<A, B> {
     private val krackers = mutableMapOf<A, B>()

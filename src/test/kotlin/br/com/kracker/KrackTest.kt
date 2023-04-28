@@ -1,9 +1,9 @@
-package com.kracker
+package br.com.kracker
 
-import com.kracker.destination.KrackerCustom
-import com.kracker.destination.KrackerNoop
-import com.kracker.destination.KrackerPrivateStorage
-import com.kracker.destination.KrackerPublicStorage
+import br.com.kracker.destination.KrackerCustom
+import br.com.kracker.destination.KrackerNoop
+import br.com.kracker.destination.KrackerPrivateStorage
+import br.com.kracker.destination.KrackerPublicStorage
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -18,10 +18,10 @@ class KrackTest {
             println("Some place")
         }
 
-        val krackResultCodeBlock = krack<String, String, KrackerTrack<String, String>>(onKrack = { k ->
-            k.track("HEY, YOU" to "I'M KRACK")
-            k.dispatch()
-            k
+        val krackResultCodeBlock = krack<String, String, KrackerTrack<String, String>>(onKrack = {
+            track("HEY, YOU" to "I'M KRACK")
+            dispatch()
+            this
         })
 
         assertTrue(
@@ -31,10 +31,10 @@ class KrackTest {
     }
 
     @Test fun `krack code block without specify the destination, ie, noop`() {
-        val krackResultCodeBlock = krack<String, String, KrackerTrack<String, String>> { k ->
-            k.track("HEY, YOU" to "I'M KRACK")
-            k
-        }
+        val krackResultCodeBlock = krack<String, String, KrackerTrack<String, String>>(onKrack = {
+            track("HEY, YOU" to "I'M KRACK")
+            this
+        })
 
         assertTrue(
             krackResultCodeBlock is KrackerNoop<String, String>,
@@ -46,14 +46,14 @@ class KrackTest {
         Kracking.useConsoleLog()
         Kracking.usePrivateStorage(tempDir)
 
-        val krackResultCodeBlock = krack<String, String, KrackerTrack<String, String>> { k ->
-            k.track("HEY, YOU" to "I'M KRACK")
-            k
-        }
+        val krackResultCodeBlock = krack<String, String, KrackerTrack<String, String>>(onKrack = {
+            track("HEY, YOU" to "I'M KRACK")
+            this
+        })
 
         assertTrue(
             krackResultCodeBlock is KrackerPrivateStorage<String, String>,
-            "Not expected instance of krack"
+            "Not expected instance of krack, actual instance is: $krackResultCodeBlock"
         )
     }
 
@@ -61,9 +61,9 @@ class KrackTest {
         Kracking.useConsoleLog()
         Kracking.usePublicStorage(tempDir)
 
-        val krackResultCodeBlock = krack<String, String, KrackerTrack<String, String>> { k ->
-            k.track("HEY, YOU" to "I'M KRACK")
-            k
+        val krackResultCodeBlock = krack<String, String, KrackerTrack<String, String>> {
+            track("HEY, YOU" to "I'M KRACK")
+            this
         }
 
         assertTrue(
@@ -76,9 +76,9 @@ class KrackTest {
         Kracking.usePrivateStorage(tempDir)
         Kracking.usePublicStorage(tempDir)
 
-        val krackResultCodeBlock = krack<String, String, KrackerTrack<String, String>> { k ->
-            k.track("HEY, YOU" to "I'M KRACK")
-            k
+        val krackResultCodeBlock = krack<String, String, KrackerTrack<String, String>> {
+            track("HEY, YOU" to "I'M KRACK")
+            this
         }
 
         assertTrue(
@@ -89,10 +89,10 @@ class KrackTest {
 
     @Test fun `krack code block with one or more track`() {
         Kracking.useConsoleLog()
-        val krackResultCodeBlock = krack<String, String, Unit> { k ->
-            k.track("HEY, YOU" to "I'M KRACK")
-            k.track("YOU" to "CAN TRACK OR")
-            k.track("KRACK" to "YOUR CODE")
+        val krackResultCodeBlock = krack<String, String, Unit> {
+            track("HEY, YOU" to "I'M KRACK")
+            track("YOU" to "CAN TRACK OR")
+            track("KRACK" to "YOUR CODE")
         }
 
         assertEquals(Unit, krackResultCodeBlock)

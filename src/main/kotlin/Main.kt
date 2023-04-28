@@ -1,5 +1,5 @@
-import com.kracker.krack
-import com.kracker.Kracking
+import br.com.kracker.krack
+import br.com.kracker.Kracking
 import java.io.File
 
 fun main() {
@@ -8,6 +8,6 @@ fun main() {
     Kracking.usePublicStorage(File("/public/sdcard/app/krack/logs"))
 
     krack<String, String, Unit> {
-        it.track("" to "")
+        track("" to "")
     }
 }

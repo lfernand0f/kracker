@@ -1,4 +1,4 @@
-package com.kracker
+package br.com.kracker
 
 interface KrackerTrack<A, B> {
     fun track(initial: Pair<A, B>)

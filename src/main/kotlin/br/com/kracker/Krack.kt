@@ -1,11 +1,10 @@
-package com.kracker
+package br.com.kracker
 
-import com.kracker.destination.KrackerConsole
-import com.kracker.destination.KrackerCustom
-import com.kracker.destination.KrackerPrivateStorage
-import com.kracker.destination.KrackerPublicStorage
-import com.kracker.destination.KrackerNoop
-
+import br.com.kracker.destination.KrackerConsole
+import br.com.kracker.destination.KrackerCustom
+import br.com.kracker.destination.KrackerPrivateStorage
+import br.com.kracker.destination.KrackerPublicStorage
+import br.com.kracker.destination.KrackerNoop
 
 /**
  * Executes the function [onKrack] for each destination specified in [Kracking].
@@ -14,24 +13,23 @@ import com.kracker.destination.KrackerNoop
  * @param onKrack Function to be executed for each destination.
  * @return Result of the last successful call to the function [onKrack] that was executed, or a default value if no function was successfully executed.
  */
-inline fun <A, B, T> krack(onKrack: (KrackerTrack<A, B>) -> T): T {
-    var krackResult: T? = null
+public inline fun <A, B, T> krack(
+    onKrack: KrackerTrack<A, B>.() -> T
+): T {
+    val destinations = mutableListOf<KrackerTrack<A, B>>()
 
     if (Kracking.destinations.contains(Kracking.Destination.AT_CONSOLE_LOG)) {
-        krackResult = onKrack(KrackerConsole())
+        destinations.add(KrackerConsole())
     }
-
     if (Kracking.destinations.contains(Kracking.Destination.AT_PRIVATE_STORAGE)) {
-        krackResult = onKrack(KrackerPrivateStorage(Kracking.privateParentDir))
+        destinations.add(KrackerPrivateStorage(Kracking.privateParentDir))
     }
-
     if (Kracking.destinations.contains(Kracking.Destination.AT_PUBLIC_STORAGE)) {
-        krackResult = onKrack(KrackerPublicStorage(Kracking.publicParentDir))
+        destinations.add(KrackerPublicStorage(Kracking.publicParentDir))
     }
-
     if (Kracking.destinations.contains(Kracking.Destination.CUSTOM)) {
-        krackResult = onKrack(KrackerCustom(Kracking.customDestination))
+        destinations.add(KrackerCustom(Kracking.customDestination))
     }
 
-    return krackResult ?: onKrack(KrackerNoop())
+    return if (destinations.isNotEmpty()) destinations.last().onKrack() else onKrack(KrackerNoop())
 }

@@ -1,10 +1,11 @@
-package com.kracker.destination
+package br.com.kracker.destination
 
-import com.kracker.KrackerTrack
+import br.com.kracker.KrackerTrack
 import java.io.File
 import java.io.ObjectOutputStream
+import java.io.Serializable
 
-class KrackerPublicStorage<A, B>(private val parentDir: File) : KrackerTrack<A, B> {
+class KrackerPrivateStorage<A, B>(private val parentDir: File) : KrackerTrack<A, B> {
 
     override fun track(initial: Pair<A, B>) {
         val task = {
@@ -13,11 +14,10 @@ class KrackerPublicStorage<A, B>(private val parentDir: File) : KrackerTrack<A, 
             oos.writeObject(initial.first to initial.second)
             oos.close()
         }
-
         task()
     }
 
     private companion object {
-        const val FILE_NAME = "public.kracker"
+        const val FILE_NAME = "private.kracker"
     }
 }
