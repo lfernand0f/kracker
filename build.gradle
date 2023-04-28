@@ -4,8 +4,8 @@ plugins {
     id 'signing'
 }
 
-group = 'com.kracker'
-version = '1.0-SNAPSHOT'
+group = 'br.com.kracker'
+version = '0.1.0'
 archivesBaseName = "kracker"
 
 dependencies {
@@ -25,7 +25,7 @@ tasks.register('javadocJar', Jar) {
 }
 
 signing {
-    sign configurations.archives
+    sign publishing.publications
 }
 
 artifacts {
@@ -35,11 +35,19 @@ artifacts {
 publishing {
     publications {
         maven(MavenPublication) {
-            from(components['java'])
             groupId group
             artifactId 'kracker'
             version version
-            artifact(sourcesJar)
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                username = "$nexusUsername"
+                password = "$nexusPassword"
+            }
+            url = "https://s01.oss.sonatype.org/content/repositories/releases/"
         }
     }
 }
