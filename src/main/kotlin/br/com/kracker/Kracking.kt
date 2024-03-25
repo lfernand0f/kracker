@@ -1,6 +1,7 @@
 package br.com.kracker
 
 import java.io.File
+import java.io.Serializable
 
 object Kracking {
     private lateinit var _privateParentDir: File
@@ -15,8 +16,8 @@ object Kracking {
         return _publicParentDir
     }
 
-    private lateinit var _customDestination: () -> Unit
-    public val customDestination: () -> Unit get() = _customDestination
+    private lateinit var _customDestination: (List<KrackerSerializableData<*, *>>) -> Unit
+    public val customDestination: (List<KrackerSerializableData<*, *>>) -> Unit get() = _customDestination
 
     private var _destinations: MutableList<Destination> = mutableListOf()
     public val destinations: List<Destination> get() = _destinations
@@ -38,7 +39,7 @@ object Kracking {
         return Destination.AT_PUBLIC_STORAGE
     }
 
-    fun useCustomStorage(onChoose: () -> Unit): Destination {
+    fun useCustomStorage(onChoose: (List<KrackerSerializableData<*, *>>) -> Unit): Destination {
         _customDestination = onChoose
         _destinations += Destination.CUSTOM
         return Destination.CUSTOM
@@ -59,3 +60,5 @@ object Kracking {
         NONE;
     }
 }
+
+data class KrackerSerializableData<A, B>(val key: A, val value: B)

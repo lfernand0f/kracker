@@ -14,22 +14,15 @@ import br.com.kracker.destination.KrackerNoop
  * @return Result of the last successful call to the function [onKrack] that was executed, or a default value if no function was successfully executed.
  */
 public inline fun <A, B, T> krack(
-    onKrack: KrackerTrack<A, B>.() -> T
+    operation: KrackerTrack<A, B>.() -> T
 ): T {
-    val destinations = mutableListOf<KrackerTrack<A, B>>()
-
-    if (Kracking.destinations.contains(Kracking.Destination.AT_CONSOLE_LOG)) {
-        destinations.add(KrackerConsole())
-    }
-    if (Kracking.destinations.contains(Kracking.Destination.AT_PRIVATE_STORAGE)) {
-        destinations.add(KrackerPrivateStorage(Kracking.privateParentDir))
-    }
-    if (Kracking.destinations.contains(Kracking.Destination.AT_PUBLIC_STORAGE)) {
-        destinations.add(KrackerPublicStorage(Kracking.publicParentDir))
-    }
-    if (Kracking.destinations.contains(Kracking.Destination.CUSTOM)) {
-        destinations.add(KrackerCustom(Kracking.customDestination))
+    val destinations = when {
+        Kracking.Destination.AT_CONSOLE_LOG in Kracking.destinations -> setOf(KrackerConsole<A, B>())
+        Kracking.Destination.AT_PRIVATE_STORAGE in Kracking.destinations -> setOf(KrackerPrivateStorage<A, B>(Kracking.privateParentDir))
+        Kracking.Destination.AT_PUBLIC_STORAGE in Kracking.destinations -> setOf(KrackerPublicStorage<A, B>(Kracking.publicParentDir))
+        Kracking.Destination.CUSTOM in Kracking.destinations -> setOf(KrackerCustom<A, B>(Kracking.customDestination))
+        else -> emptySet()
     }
 
-    return if (destinations.isNotEmpty()) destinations.last().onKrack() else onKrack(KrackerNoop())
+    return destinations.map(operation).last()
 }
